@@ -21,44 +21,42 @@ const server = net.createServer(client => {
   client.on("data", data => {
     //build clients in node
     data = data.toString();
-    userList.forEach(client => {
-      if (client === USER) {
-        return;
-      } //don't send to self
-      client.write(data);
-    });
-    console.log(USER + ":" + data);
-    // if (data.charAt(0) === "$") {
-    //   //changing user name
-    //   let newNameHolder = [];
-    //   for (var i = 1; i < data.length; i++) {
-    //     newNameHolder.push(data[i]);
-    //   }
-    //   newName = newNameHolder.join("");
-    //   if (newName.toLowerCase() === "admin") {
-    //     //cannot set name to admin
-    //     client.write("You cannot be an admin!");
-    //     return;
-    //   } else {
-    //     client.write("You are now " + newName);
-    //     userList.push(newName);
-    //     return newName;
-    //   }
-    // }
 
-    // if (typeof newName === "string") {
-    //   broadcast(data, newName);
-    // } else {
-    //   broadcast(data, USER);
-    // }
+    console.log(USER + ":" + data);
+    if (data.charAt(0) === "$") {
+      //changing user name
+      let newNameHolder = [];
+      for (var i = 1; i < data.length; i++) {
+        newNameHolder.push(data[i]);
+      }
+      newName = newNameHolder.join("");
+      if (newName.toLowerCase() === "admin") {
+        //cannot set name to admin
+        client.write("You cannot be an admin!");
+        return;
+      } else {
+        client.write("You are now " + newName);
+        userList.push(newName);
+        return newName;
+      }
+    }
+
+    if (typeof newName === "string") {
+      broadcast(data, newName);
+    } else {
+      broadcast(data, USER);
+    }
   });
 
-  //   client.on("end", () => {
-  //     server.client.splice(server.client.indexOf(client), 1);
-  //     console.log(USER + newName + " disconnected from server");
-  //   });
+  client.on("end", () => {
+    server.client.splice(server.client.indexOf(client), 1);
+    console.log(USER + newName + " disconnected from server");
+  });
 });
 
+process.stdout.on("data", data => {
+  broadcast(data, "[ADMIN]");
+});
 server.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`);
   console.log(`Server is listening to connections on: ${PORT}`);
@@ -72,7 +70,7 @@ const broadcast = (message, sender) => {
     if (client === sender) {
       return;
     } //don't send to self
-    client.write(message);
+    client.write(sender + ": " + message);
   });
   console.log(sender + ":" + message);
 };
