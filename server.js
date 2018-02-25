@@ -53,7 +53,7 @@ const server = net.createServer(client => {
     console.log(USER + newName + " disconnected from server");
   });
 });
-
+//admin broadcasting
 process.stdout.on("data", data => {
   broadcast(data, "[ADMIN]");
 });
