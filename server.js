@@ -4,8 +4,9 @@ const userList = [];
 let newName;
 
 const server = net.createServer(client => {
-  userList.push(client); //adding to userList arr
   let USER = client.remoteAddress + ": " + client.remotePort;
+  userList.push(USER); //adding to userList arr
+  console.log(USER);
   //Text startup for Client
   broadcast(" has joined", USER);
   client.write("\n");
@@ -30,8 +31,11 @@ const server = net.createServer(client => {
         newNameHolder.push(data[i]);
       }
       newName = newNameHolder.join("");
-      if (newName.toLowerCase() === "admin") {
+      let lowerCase = newName.toLowerCase();
+      console.log(userList);
+      if (newName.toLowerCase() === "admin" || userList.indexOf(newName)) {
         //cannot set name to admin
+
         client.write("You cannot be an admin!");
         return;
       } else {
@@ -49,12 +53,14 @@ const server = net.createServer(client => {
   });
 
   client.on("end", () => {
-    server.client.splice(server.client.indexOf(client), 1);
+    userList.splice(userList.indexOf(USER), 1);
     console.log(USER + newName + " disconnected from server");
   });
 });
 //admin broadcasting
 process.stdout.on("data", data => {
+  if (data.charAt(0) == "/") {
+  }
   broadcast(data, "[ADMIN]");
 });
 server.listen(PORT, () => {
@@ -66,11 +72,11 @@ server.on("error", err => {
   throw err;
 });
 const broadcast = (message, sender) => {
-  userList.forEach(client => {
-    if (client === sender) {
+  userList.forEach(e => {
+    if (e === sender) {
       return;
     } //don't send to self
-    client.write(sender + ": " + message);
+    e.write(sender + ": " + message);
   });
   console.log(sender + ":" + message);
 };
